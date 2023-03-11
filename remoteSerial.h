@@ -9,15 +9,12 @@ JSONVar serialHandleType;
 int serialHandlerIndex = 0;
 int baseSingleData = 0;
 
-// void (*dataRecieve[100])(String);
 void (*serialDataRecieve[100])(String);
 void (*baseDataRecieve[1])(JSONVar);
 
 void registerSerial(Stream *serial)
 {
     remoteSerial = serial;
-    // remoteSerial->begin(921600, SERIAL_8N1, 16, 17);
-    // remoteSerial->setTimeout(1);
 }
 
 void serialListener()
@@ -25,21 +22,15 @@ void serialListener()
     if(remoteSerial->available())
     {
         remoteSingleData = (char)remoteSerial->read();
-        // Serial.println(remoteSingleData);
         if (remoteSingleData == '\n')
         {
-            // Serial.println("GOOOOOOOOOO");
             if (dataString == "base")
             {
                 baseDataRecieve[0](baseData);
-                // Serial.println(JSON.stringify(baseData));
-                // Serial.println("base");
             }
             else if(dataString != "base")
             {
-                // Serial.println("LOL: "+dataString);
                 int typeIndex = serialHandleType[dataString];
-                // Serial.println(typeIndex);
                 serialDataRecieve[typeIndex](dataString);
             }
             isDataDigit = false;
@@ -55,7 +46,6 @@ void serialListener()
             {
                 isDataDigit = isDigit(remoteSingleData);
                 _initData = true;
-                // Serial.println("not init"+(String)isDataDigit);
             }
             else if(remoteSingleData == '-')
             {
@@ -74,7 +64,6 @@ void serialListener()
                         {
                             baseData["fx"] = baseSingleData;
                         }
-                        // Serial.println("fx: "+String(baseData["fx"]));
                         baseX = true;
                         dataString = "";
                     }
@@ -92,8 +81,6 @@ void serialListener()
                     else if (!baseR)
                     {
                         baseData["fr"] = baseSingleData / 4;
-                        // posR = baseData["fr"];
-                        // Serial.println("posR: " + String(posR));
                         baseData["type"] = "drive";
                         baseR = true;
                         isDataDigit = true; // redundant
@@ -107,7 +94,6 @@ void serialListener()
             }
             else
             {
-                // Serial.println("f:"+remoteSingleData);
                 dataString += remoteSingleData;
             }
         }
