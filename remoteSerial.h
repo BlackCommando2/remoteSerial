@@ -37,8 +37,9 @@ void serialListener()
             }
             else if(dataString != "base")
             {
-                Serial.println("LOL: "+dataString);
+                // Serial.println("LOL: "+dataString);
                 int typeIndex = serialHandleType[dataString];
+                // Serial.println(typeIndex);
                 serialDataRecieve[typeIndex](dataString);
             }
             isDataDigit = false;
@@ -116,15 +117,14 @@ void serialListener()
 void setSerialReciever(void (*f)(String), String type)
 {
     serialHandleType[type] = serialHandlerIndex;
-    Serial.println("HandlerIndex: " + serialHandlerIndex);
+    Serial.println("HandlerIndex: " + (String)serialHandlerIndex);
     Serial.println("Type: " + type);
     serialDataRecieve[serialHandlerIndex++] = f;
 }
 
 void setBaseReciever(void (*f)(JSONVar), String type)
 {
-    serialHandleType[type] = 0;
-    Serial.println("HandlerIndex: " + 0);
+    Serial.println("BaseHandlerIndex: " + (String)0);
     Serial.println("Type: " + type);
     baseDataRecieve[0] = f;
 }
