@@ -8,8 +8,8 @@ JSONVar baseData;
 JSONVar serialHandleType;
 int serialHandlerIndex = 0;
 int baseSingleData = 0;
-
-void (*serialDataRecieve[100])(String);
+int maxHandlers = 50;
+void (*serialDataRecieve[50])(String);
 void (*baseDataRecieve[1])(JSONVar);
 
 void registerSerial(Stream *serial)
