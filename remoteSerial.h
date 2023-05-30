@@ -5,12 +5,16 @@ String dataString = "";
 bool baseX = false, baseY = false, baseR = false;
 bool pressed = false;
 JSONVar baseData;
-JSONVar serialHandleType;
-int serialHandlerIndex = 0;
+JSONVar stringHandleType;
+JSONVar jsonHandleType;
+int stringHandlerIndex = 1;
+int jsonHandlerIndex = 1;
 int baseSingleData = 0;
 int maxHandlers = 50;
-void (*serialDataRecieve[50])(String);
-void (*baseDataRecieve[1])(JSONVar);
+bool defautlCheck = false;
+String allKeys[50];
+void (*serialDataRecieve[25])(String);
+void (*baseDataRecieve[25])(JSONVar);
 
 void registerSerial(Stream *serial)
 {
@@ -24,14 +28,28 @@ void serialListener()
         remoteSingleData = (char)remoteSerial->read();
         if (remoteSingleData == '\n')
         {
-            if (dataString == "base")
+            int typeIndex = jsonHandleType[dataString];
+            // Serial.println("jsonIndex: "+(String)typeIndex);
+            if (typeIndex != 0)
             {
-                baseDataRecieve[0](baseData);
+                baseDataRecieve[typeIndex](baseData);
             }
-            else if(dataString != "base")
+            else
             {
-                int typeIndex = serialHandleType[dataString];
-                serialDataRecieve[typeIndex](dataString);
+                typeIndex = stringHandleType[dataString]; 
+                // Serial.println("StringIndex: "+(String)typeIndex);
+                // typeIndex = typeIndex == -1? 0 : typeIndex;
+                if(typeIndex != 0)
+                {
+                    // int typeIndex = stringHandleType[dataString];
+                    // typeIndex = typeIndex == -1? 0 : typeIndex;
+                    serialDataRecieve[typeIndex](dataString);
+                }
+                else
+                {
+                    typeIndex = typeIndex == -1? 0 : typeIndex;
+                    serialDataRecieve[typeIndex](dataString);
+                }
             }
             isDataDigit = false;
             baseX = false;
@@ -102,15 +120,54 @@ void serialListener()
 
 void setSerialReciever(void (*f)(String), String type)
 {
-    serialHandleType[type] = serialHandlerIndex;
-    Serial.println("HandlerIndex: " + (String)serialHandlerIndex);
-    Serial.println("Type: " + type);
-    serialDataRecieve[serialHandlerIndex++] = f;
+    // Serial.println("json: "+(String)(int)jsonHandleType[type] + " "+type);
+    // Serial.println("string: "+(String)(int)stringHandleType[type] + " "+type);
+    if((int)jsonHandleType[type]!=0 && (int)stringHandleType[type]!=0)
+    {
+        Serial.println("Error: Can't have two same type: " + type);
+    }
+    else
+    {
+        stringHandleType[type] = stringHandlerIndex;
+        Serial.println("HandlerIndex: " + (String)stringHandlerIndex);
+        Serial.println("Type: " + type);
+        serialDataRecieve[stringHandlerIndex++] = f;
+    }
 }
 
-void setBaseReciever(void (*f)(JSONVar), String type)
+void setSerialReciever(void (*f)(String))
 {
-    Serial.println("BaseHandlerIndex: " + (String)0);
-    Serial.println("Type: " + type);
-    baseDataRecieve[0] = f;
+    int defaultIndex = 0;
+    stringHandleType["string"] = defaultIndex;
+    Serial.println("HandlerIndex: " + (String)defaultIndex);
+    // Serial.println("Type: " + type);
+    Serial.println("Type: string");
+    serialDataRecieve[defaultIndex] = f;
+}
+
+void setSerialReciever(void (*f)(JSONVar))
+{
+    int defaultIndex = 0;
+    stringHandleType["string"] = defaultIndex;
+    Serial.println("HandlerIndex: " + (String)defaultIndex);
+    // Serial.println("Type: " + type);
+    Serial.println("Type: string");
+    baseDataRecieve[defaultIndex] = f;
+}
+
+void setSerialReciever(void (*f)(JSONVar), String type)
+{
+    // Serial.println("SERialjson: "+(String)(int)jsonHandleType[type] + " "+type);
+    // Serial.println("SERialstring: "+(String)(int)stringHandleType[type] + " "+type);
+    if((int)jsonHandleType[type]!=0 && (int)stringHandleType[type]!=0)
+    {
+        Serial.println("Error: Can't have two same type: " + type);
+    }
+    else
+    {
+        jsonHandleType[type] = jsonHandlerIndex;
+        Serial.println("BaseHandlerIndex: " + (String)jsonHandlerIndex);
+        Serial.println("Type: " + type);
+        baseDataRecieve[jsonHandlerIndex++] = f;
+    }
 }
